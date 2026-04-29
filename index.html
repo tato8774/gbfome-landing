@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GBFome — Peça comida perto de você</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #E87008;
+      --primary-light: #FFF3E0;
+      --primary-dark: #BF5A04;
+      --dark: #1A1208;
+      --gray: #6B6459;
+      --light: #FDF8F3;
+      --white: #FFFFFF;
+      --radius: 16px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--light);
+      color: var(--dark);
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 40px;
+      background: rgba(253, 248, 243, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(232, 112, 8, 0.12);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .nav-logo img {
+      height: 36px;
+    }
+
+    .nav-cta {
+      background: var(--primary);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      padding: 10px 22px;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .nav-cta:hover { background: var(--primary-dark); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -120px; right: -120px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(232,112,8,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; left: -80px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(232,112,8,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 16px;
+      border-radius: 50px;
+      margin-bottom: 28px;
+      border: 1px solid rgba(232,112,8,0.2);
+    }
+
+    .hero-badge span {
+      width: 6px; height: 6px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.4rem, 6vw, 4.2rem);
+      line-height: 1.1;
+      max-width: 780px;
+      margin-bottom: 24px;
+      color: var(--dark);
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--primary);
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: var(--gray);
+      max-width: 520px;
+      line-height: 1.7;
+      margin-bottom: 44px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--primary);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 16px;
+      padding: 16px 32px;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 4px 20px rgba(232,112,8,0.3);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary svg { width: 20px; height: 20px; }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--dark);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 16px;
+      padding: 16px 32px;
+      border-radius: 50px;
+      text-decoration: none;
+      border: 1.5px solid rgba(26,18,8,0.15);
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .hero-logo {
+      margin-top: 64px;
+      opacity: 0.12;
+    }
+
+    .hero-logo img { width: 200px; }
+
+    /* FEATURES */
+    .features {
+      padding: 100px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      line-height: 1.2;
+      margin-bottom: 56px;
+      max-width: 520px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      border: 1px solid rgba(232,112,8,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(232,112,8,0.1);
+    }
+
+    .feature-icon {
+      width: 48px; height: 48px;
+      background: var(--primary-light);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .feature-icon svg {
+      width: 24px; height: 24px;
+      stroke: var(--primary);
+    }
+
+    .feature-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+    }
+
+    .feature-card p {
+      font-size: 0.95rem;
+      color: var(--gray);
+      line-height: 1.65;
+    }
+
+    /* HOW IT WORKS */
+    .how {
+      background: var(--dark);
+      color: var(--white);
+      padding: 100px 24px;
+      text-align: center;
+    }
+
+    .how .section-label { color: #F0A050; }
+
+    .how .section-title {
+      color: var(--white);
+      margin: 0 auto 56px;
+      text-align: center;
+    }
+
+    .steps {
+      display: flex;
+      gap: 0;
+      justify-content: center;
+      flex-wrap: wrap;
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .step {
+      flex: 1;
+      min-width: 200px;
+      max-width: 240px;
+      padding: 0 20px;
+      position: relative;
+    }
+
+    .step-number {
+      width: 52px; height: 52px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--white);
+      margin: 0 auto 20px;
+    }
+
+    .step h4 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: var(--white);
+    }
+
+    .step p {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.6;
+    }
+
+    /* DOWNLOAD */
+    .download {
+      padding: 100px 24px;
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .download-card {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 56px 48px;
+      border: 1px solid rgba(232,112,8,0.15);
+      box-shadow: 0 20px 60px rgba(232,112,8,0.08);
+    }
+
+    .download-card img {
+      width: 80px;
+      margin-bottom: 24px;
+    }
+
+    .download-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+    }
+
+    .download-card p {
+      color: var(--gray);
+      font-size: 1rem;
+      line-height: 1.65;
+      margin-bottom: 32px;
+    }
+
+    .version-tag {
+      display: inline-block;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 50px;
+      margin-bottom: 24px;
+    }
+
+    /* FEEDBACK */
+    .feedback {
+      background: var(--primary-light);
+      padding: 100px 24px;
+      text-align: center;
+    }
+
+    .feedback .section-title {
+      margin: 0 auto 12px;
+      text-align: center;
+    }
+
+    .feedback > p {
+      color: var(--gray);
+      font-size: 1rem;
+      margin-bottom: 36px;
+    }
+
+    .feedback-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--primary);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 16px;
+      padding: 16px 36px;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 4px 20px rgba(232,112,8,0.25);
+    }
+
+    .feedback-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--dark);
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 13px;
+    }
+
+    footer img { height: 28px; opacity: 0.5; margin-bottom: 12px; display: block; margin-inline: auto; }
+
+    /* ANIMATIONS */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 600px) {
+      nav { padding: 14px 20px; }
+      .download-card { padding: 40px 24px; }
+      .steps { gap: 32px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <img src="logo_gbfome.png" alt="GBFome" />
+    </a>
+    <a href="#download" class="nav-cta">Baixar app</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span></span>
+      Disponível agora para Android
+    </div>
+    <h1>A comida que você quer,<br /><em>do restaurante ao lado</em></h1>
+    <p>O GBFome conecta você aos melhores restaurantes da sua cidade. Peça com facilidade, acompanhe pelo WhatsApp e receba em casa.</p>
+    <div class="hero-buttons">
+      <a href="#download" class="btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 0 0 4.561 21h14.878a2 2 0 0 0 1.94-1.515L22 17"/>
+        </svg>
+        Baixar APK
+      </a>
+      <a href="#como-funciona" class="btn-secondary">Como funciona</a>
+    </div>
+    <div class="hero-logo">
+      <img src="logo_gbfome.png" alt="" aria-hidden="true" />
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <p class="section-label fade-up">Por que o GBFome</p>
+    <h2 class="section-title fade-up">Simples, rápido e feito para sua cidade</h2>
+    <div class="features-grid">
+      <div class="feature-card fade-up">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </div>
+        <h3>Restaurantes locais</h3>
+        <p>Apoie os negócios da sua cidade. Encontre os melhores sabores perto de você sem sair de casa.</p>
+      </div>
+      <div class="feature-card fade-up">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <h3>Pedido via WhatsApp</h3>
+        <p>Finalizou? O pedido vai direto para o restaurante pelo WhatsApp. Simples, direto e sem complicação.</p>
+      </div>
+      <div class="feature-card fade-up">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <h3>Rápido e sem frescura</h3>
+        <p>Nada de cadastros intermináveis. Escolha, monte seu pedido e envie em poucos toques.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how" id="como-funciona">
+    <p class="section-label fade-up">Passo a passo</p>
+    <h2 class="section-title fade-up">Como funciona</h2>
+    <div class="steps">
+      <div class="step fade-up">
+        <div class="step-number">1</div>
+        <h4>Escolha o restaurante</h4>
+        <p>Navegue pelos restaurantes disponíveis na sua cidade.</p>
+      </div>
+      <div class="step fade-up">
+        <div class="step-number">2</div>
+        <h4>Monte seu pedido</h4>
+        <p>Selecione os pratos, adicione ao carrinho e personalize como quiser.</p>
+      </div>
+      <div class="step fade-up">
+        <div class="step-number">3</div>
+        <h4>Confirme e envie</h4>
+        <p>O pedido é enviado direto ao restaurante pelo WhatsApp.</p>
+      </div>
+      <div class="step fade-up">
+        <div class="step-number">4</div>
+        <h4>Aguarde na porta</h4>
+        <p>O restaurante confirma e você acompanha tudo pelo chat.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOWNLOAD -->
+  <section class="download" id="download">
+    <div class="download-card fade-up">
+      <img src="gbf_icon.png" alt="GBFome ícone" />
+      <span class="version-tag">Versão Beta — Android</span>
+      <h2>Baixe agora e teste</h2>
+      <p>O GBFome está em fase de testes. Faça parte dos primeiros usuários e ajude a moldar o aplicativo da sua cidade.</p>
+      <!-- Substitua o href pelo link real do APK no Google Drive ou GitHub Releases -->
+      <a href="LINK_DO_APK_AQUI" class="btn-primary" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px">
+          <path d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 0 0 4.561 21h14.878a2 2 0 0 0 1.94-1.515L22 17"/>
+        </svg>
+        Baixar APK
+      </a>
+    </div>
+  </section>
+
+  <!-- FEEDBACK -->
+  <section class="feedback" id="feedback">
+    <p class="section-label fade-up">Sua opinião importa</p>
+    <h2 class="section-title fade-up">Nos ajude a melhorar</h2>
+    <p class="fade-up">Testou o app? Conta pra gente o que achou — cada feedback faz o GBFome melhor.</p>
+    <!-- Substitua pelo link do Google Forms -->
+    <a href="https://forms.gle/Qh5bZ7eyxvCGLrDb7" target="_blank" class="feedback-btn fade-up">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+      Enviar feedback
+    </a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <img src="logo_gbfome.png" alt="GBFome" />
+    <p>© 2026 GBFome · Feito com cuidado para cidades que merecem mais</p>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 80);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
